@@ -2,7 +2,7 @@ class DataProcessor:
     def __init__(self, sensor):
         self.sensor = sensor
 
-    def get_exact_position(self, gps_value, ebimu_value):
+    def calculate_exact_position(self, gps_value, ebimu_value):
         position = [0,0,0]
         return position
         
