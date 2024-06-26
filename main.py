@@ -1,22 +1,26 @@
 from decision_maker import DecisionMaker
-from sensor import Sensor
+from sensor import Bmp, Ebimu, Gps, Bno
 from parachute import Parachute
 import time
 
 def main():
-    sensor = Sensor()
+    bmp = Bmp()
+    ebimu = Ebimu()
+    gps = Gps()
+    bno = Bno()
+
     parachute = Parachute()
     decision_maker = DecisionMaker()
     
     while True:
-        bmp_value = sensor.read_bmp()
-        ebimu_value = sensor.read_ebimu()
-        gps_value = sensor.read_gps()
-        bno_value = sensor.read_bno()
+        bmp_value = bmp.read()
+        ebimu_value = ebimu.read()
+        gps_value = gps.read()
+        bno_value = bno.read()
 
         is_altitude_descent = decision_maker.is_altitude_descent(bmp_value)
         is_descent_angle = decision_maker.is_descent_angle(ebimu_value)
-        is_in_critical_area = decision_maker.is_in_critical_area(gps_value, ebimu_value)
+        is_in_critical_area = decision_maker.is_in_critical_area()
         is_force_ejection_active = decision_maker.is_force_ejection_active()
 
         parachute_statue = parachute.is_parachute_deployed

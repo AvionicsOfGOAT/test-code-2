@@ -9,10 +9,11 @@ db_config = {
 }
 
 class Database:
-    # def __init__(self):
+    def __init__(self):
     #     self.connect()
+        return
 
-    # def connect(self):
+    def connect(self):
     #     try:
     #         # MySQL 서버에 연결
     #         self.conn = mysql.connector.connect(**db_config)
@@ -27,7 +28,8 @@ class Database:
     #         if 'conn' in locals() and conn.is_connected():
     #             self.conn.close()
     #             print('MySQL 연결이 닫혔습니다.')
-    pass
+        return
+
         
     def save(self, table_name, data):
         # try:
@@ -52,5 +54,7 @@ class Database:
         # finally:
         #     if 'cursor' in locals():
         #         cursor.close()
-        pass
+        return
         
+    def get_last(self, table_name):
+        return

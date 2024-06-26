@@ -15,92 +15,83 @@
 from data_file import DataFile
 from database import Database
 
-BMP = "BMP"
-GPS = "GPS"
-EBIMU = "EBIMU"
-BNO = "BNO"
-
 class Sensor:
+    db = Database()
     def __init__(self):
-        self.db = Database()
-        self.init_bmp()
-        self.init_gps()
-        self.init_ebimu()
-        self.init_bno()
+        self.name = "센서이름"
 
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : bmp 센서 연결
-    # 출력 : 없음
-    def init_bmp(self):
-        self.bmp_data_File = DataFile(BMP)
-        print(BMP+" connected")
+    def init(self):
+        self.data_file = DataFile(self.name)
+        print(self.name +" connected")
 
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : gps 센서 연결
-    # 출력 : 없음
-    def init_gps(self):
-        self.gps_data_File = DataFile("GPS")
-        print(GPS+" connected")
+    def save(self, data):
+        self.data_file.save(data)
+        Sensor.db .save(self.name,data)
 
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : ebimu 센서 연결
-    # 출력 : 없음
-    def init_ebimu(self):
-        self.ebimu_data_File = DataFile("EBIMU")
-        print(EBIMU+" connected")
-
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : bno 센서 연결
-    # 출력 : 없음
-    def init_bno(self):
-        self.bno_data_File = DataFile("BMP")
-        print(BNO+" connected")
-        
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : bmp 센서 값 읽기
-    # 출력 : 데이터반환, 형식 : 숫자   
-    def read_bmp(self):
+    def read(self):
         data = 0
+        return data
 
-        self.bmp_data_File.save(data)
-        self.db .save(BMP,data)
+class Bmp(Sensor):
+    def __init__(self):
+        self.name = "BMP"
+        self.sensor = self.init()
+
+    def init(self):
+        # 작성
+        super().init()
+        return "센서객체"
+
+    def read(self):
+        data = 0
+        # 작성
+        super().save(data)
+        return data
+
+class Gps(Sensor):
+    def __init__(self):
+        self.name = "GPS"
+        self.sensor = self.init()
+
+    def init(self):
+        # 작성
+        super().init()
+        return "센서객체"
+
+    def read(self):
+        data = 0
+        # 작성
+        super().save(data)
         return data
     
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : gps 센서 값 읽기
-    # 출력 : 데이터반환, 형식 : [위도, 경도]   
-    def read_gps(self):
-        data = [0,0] # 위도 경도
+class Ebimu(Sensor):
+    def __init__(self):
+        self.name = "EBIMU"
+        self.sensor = self.init()
 
-        self.gps_data_File.save(data)
-        self.db .save(GPS,data)
+    def init(self):
+        # 작성
+        super().init()
+        return "센서객체"
+
+    def read(self):
+        data = 0
+        # 작성
+        super().save(data)
         return data
+    
+class Bno(Sensor):
+    def __init__(self):
+        self.name = "BNO"
+        self.sensor = self.init()
 
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : ebimu 센서 값 읽기
-    # 출력 : 데이터반환, 형식 : [roll, pitch, yaw, x, y, z]
-    def read_ebimu(self):
-        data = [0,0,0,0,0,0] # roll, pitch, yaw, x, y, z
+    def init(self):
+        # 작성
+        super().init()
+        return "센서객체"
 
-        self.ebimu_data_File.save(data)
-        self.db .save(EBIMU,data)
+    def read(self):
+        data = 0
+        # 작성
+        super().save(data)
         return data
-
-    # 담당자 : 정민준
-    # 입력 : 없음
-    # 내용 : bno 센서 값 읽기
-    # 출력 : 데이터반환, 형식 : [roll, pitch, yaw]
-    def read_bno(self):
-        data = [0,0,0] # roll, pitch, yaw
-
-        self.bno_data_File.save(data)
-        self.db .save(BNO,data)
-        return data
-
