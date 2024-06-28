@@ -57,4 +57,23 @@ class Database:
         return
         
     def get_last(self, table_name):
+        try:
+            cursor = self.conn.cursor(dictionary=True)
+
+            # 테이블에서 가장 최근 데이터 가져오기
+            query = f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 1"
+            cursor.execute(query)
+
+            # 결과 가져오기
+            last_data = cursor.fetchone()
+
+            return last_data
+
+        except mysql.connector.Error as e:
+            print(f'Error fetching last data from MySQL: {e}')
+
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
         return
+
