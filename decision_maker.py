@@ -1,24 +1,30 @@
-import self
+
 import datetime
 from database import Database
 import numpy as np
 import time
+import math
 from sensor import Bmp
 
 class DecisionMaker:
     db = Database()
-    datas = []
-    moving_averages = []
-    falling_count = 0
-
-    WINDOW = 3
-    FALLING_CONFIRMATION = 10
-    NO_DEPLOY_ALTITUDE = 1
-    ESTIMATED_MAX_ALTITUDE = 400
-    ESTIMATED_MIN_ALTITUDE = -10
-
     def __init__(self):
+        self.db = Database()
         self.init_altitude()
+        self.init_theta()
+        self.datas = []
+        self.moving_averages = []
+        self.falling_count = 0
+
+        self.WINDOW = 3
+        self.FALLING_CONFIRMATION = 10
+        self.NO_DEPLOY_ALTITUDE = 1
+        self.ESTIMATED_MAX_ALTITUDE = 400
+        self.ESTIMATED_MIN_ALTITUDE = -10
+        self.theta = 0
+
+    def init_theta(self):
+        self.theta = 9.514
 
     def init_altitude(self):
         bmp = Bmp()
@@ -29,29 +35,29 @@ class DecisionMaker:
             init_buffer.append(bmp.read())
             if (i + 1) % 10 == 0:
                 print(f"{(i + 1) * 2} %")
-        DecisionMaker.init_altitude = sum(init_buffer) / INIT_TIMES
+        self.init_altitude = sum(init_buffer) / INIT_TIMES
         print("Done OK")
 
     def is_altitude_descent(self, bmp_value):
-        altitude = bmp_value - DecisionMaker.init_altitude
+        altitude = bmp_value - self.init_altitude
 
-        if DecisionMaker.ESTIMATED_MIN_ALTITUDE <= altitude <= DecisionMaker.ESTIMATED_MAX_ALTITUDE:
-            DecisionMaker.datas.append(altitude)
+        if self.ESTIMATED_MIN_ALTITUDE <= altitude <= self.ESTIMATED_MAX_ALTITUDE:
+            self.datas.append(altitude)
 
-        mean = np.mean(DecisionMaker.datas[-DecisionMaker.WINDOW:])
-        DecisionMaker.moving_averages.append(mean)
+        mean = np.mean(self.datas[-self.WINDOW:])
+        self.moving_averages.append(mean)
 
         is_valid_falling = False
-        if DecisionMaker.moving_averages[-1] > DecisionMaker.NO_DEPLOY_ALTITUDE:
+        if self.moving_averages[-1] > self.NO_DEPLOY_ALTITUDE:
             is_valid_falling = True
 
-        if len(DecisionMaker.moving_averages) > 2 and DecisionMaker.moving_averages[-2] > DecisionMaker.moving_averages[-1]:
+        if len(self.moving_averages) > 2 and self.moving_averages[-2] > self.moving_averages[-1]:
             if is_valid_falling:
-                DecisionMaker.falling_count += 1
+                self.falling_count += 1
         else:
-            DecisionMaker.falling_count = 0
+            self.falling_count = 0
 
-        if DecisionMaker.falling_count >= DecisionMaker.FALLING_CONFIRMATION:
+        if self.falling_count >= self.FALLING_CONFIRMATION:
             return True
         return False
 
@@ -62,18 +68,19 @@ class DecisionMaker:
         else:
             return False
 
-
-
-
     def is_force_ejection_active(self):
         is_force_ejection_active = self.db.get_last("force_ejection")
         if is_force_ejection_active == 1:
             return True
         return False
         
-    def is_in_critical_area(self):
-        is_in_critical_area = self.db.get_last("critical_area")
-        if is_in_critical_area == 1:
-            return True
-        return False
+    def is_in_critical_area(self,exact_position):
+        x = exact_position[0]
+        y = exact_position[1]
+        z = exact_position[2]
 
+        length = math.sqrt(x ** 2 + y **2)
+        height = length * self.theta
+
+        if height < abs(z):return True
+        else:return False
