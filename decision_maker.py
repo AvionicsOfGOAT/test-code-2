@@ -10,7 +10,6 @@ class DecisionMaker:
     db = Database()
     def __init__(self):
         self.db = Database()
-        self.init_altitude()
         self.init_theta()
         self.datas = []
         self.moving_averages = []
@@ -39,7 +38,7 @@ class DecisionMaker:
         print("Done OK")
 
     def is_altitude_descent(self, bmp_value):
-        altitude = bmp_value - self.init_altitude
+        altitude = bmp_value
 
         if self.ESTIMATED_MIN_ALTITUDE <= altitude <= self.ESTIMATED_MAX_ALTITUDE:
             self.datas.append(altitude)
@@ -62,7 +61,12 @@ class DecisionMaker:
         return False
 
     def is_descent_angle(self, ebimu_value):
-        r, p, y, x, y, z = ebimu_value
+        r = ebimu_value[0]
+        p = ebimu_value[1]
+        y = ebimu_value[2]
+        x = ebimu_value[3]
+        y = ebimu_value[4]
+        z = ebimu_value[5]
         if abs(r) + abs(p) >= 80:
             return True
         else:
@@ -70,8 +74,7 @@ class DecisionMaker:
 
     def is_force_ejection_active(self):
         is_force_ejection_active = self.db.get_last("force_ejection")
-        if is_force_ejection_active == 1:
-            return True
+        print(is_force_ejection_active)
         return False
         
     def is_in_critical_area(self,exact_position):

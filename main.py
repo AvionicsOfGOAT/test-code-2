@@ -12,15 +12,14 @@ def main():
     parachute = Parachute()
     decision_maker = DecisionMaker()
     data_processor = DataProcessor()
-    
+
     while True:
         bmp_value = bmp.read()
         ebimu_value = ebimu.read()
         gps_value = gps.read()
-    
-        exact_position = data_processor(ebimu_value, gps_value)
-        decision_maker.is_in_critical_area(exact_position)
 
+        exact_position = data_processor.calculate_exact_position(ebimu_value, gps_value)
+        decision_maker.is_in_critical_area(exact_position)
         is_altitude_descent = decision_maker.is_altitude_descent(bmp_value)
         is_descent_angle = decision_maker.is_descent_angle(ebimu_value)
         is_force_ejection_active = decision_maker.is_force_ejection_active()

@@ -26,7 +26,7 @@ class Sensor:
 
     def save(self, data):
         self.data_file.save(data)
-        Sensor.db.save("bmp",data)
+        Sensor.db.save(self.name,data)
 
     def read(self):
         data = 0
@@ -35,18 +35,20 @@ class Sensor:
 class Bmp(Sensor):
     def __init__(self):
         self.name = "BMP"
+        self.init_altitude = 0
         self.sensor = self.init()
 
     def init(self):
         i2c = board.I2C()  
         sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
         sensor.sea_level_pressure = 1013.25
+        self.init_altitude = sensor.altitude
         super().init()
         return sensor
 
     def read(self):
-        data = self.sensor.altitude
-        data = 0
+        data = self.sensor.altitude-self.init_altitude
+        print("bmp",data)
         super().save(data)
         return data
 
@@ -62,7 +64,7 @@ class Gps(Sensor):
         return sensor
 
     def read(self):
-        data = 0
+        data = [0,0]
         (raw_data, parsed_data) = self.sensor.read()
         lines = str(raw_data).split('$')
         gngll_data = ""
@@ -80,6 +82,7 @@ class Gps(Sensor):
                 data = [latitude, latitude]
             except ValueError:
                 pass
+        print("gps",data)
         super().save(data)
         return data
     
@@ -95,7 +98,7 @@ class Ebimu(Sensor):
         return sensor
 
     def read(self):
-        data = 0
+        data = [0,0,0,0,0,0]
 
         if self.sensor.inWaiting():
             read_data = str(self.sensor.read()).strip() 
@@ -112,6 +115,7 @@ class Ebimu(Sensor):
                 data = [roll,pitch,yaw,x,y,z]
                 self.buf = ""
 
-        if data != 0:
+        if data != [0,0,0,0,0,0]:
+            print("ebimu",data)
             super().save(data)
         return data
