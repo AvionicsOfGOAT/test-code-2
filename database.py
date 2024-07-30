@@ -16,23 +16,20 @@ class Database:
     def connect(self):
         try:
             self.conn = mysql.connector.connect(**db_config)
+            self.save("test","1")
             if self.conn.is_connected():
                 print('MySQL connected.')
         except mysql.connector.Error as e:
             print(f'Error connecting to MySQL: {e}')
-        finally:
-            if 'conn' in locals() and conn.is_connected():
-                self.conn.close()
-                print('MySQL diconnected.')
         
     def save(self, name, data):
         try:
             cursor = self.conn.cursor()
             query = "INSERT INTO rocket_data VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (0, name, str(datetime.datetime.now()), str(data)))
+            cursor.execute(query, (0, name, 1, str(data)))
             self.conn.commit()
         except mysql.connector.Error as e:
-            print(f'Error inserting data into MySQL: {e}')
+            print(f'{name} Error inserting data into MySQL: {e}')
         finally:
             if 'cursor' in locals():
                 cursor.close()

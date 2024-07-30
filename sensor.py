@@ -7,7 +7,6 @@ from data_file import DataFile
 from database import Database
 
 class Sensor:
-    db = Database()
     def __init__(self):
         self.name = ""
 
@@ -15,22 +14,23 @@ class Sensor:
         self.data_file = DataFile(self.name)
         print(self.name +" connected.")
 
-    def reader(self, n):
+    def reader(self, queue):
+        self.db= Database()
         print(self.name +" process started.")
         while True:
-            self.read()
+            data = self.read()
+            if data != None:
+                queue.put(data)
 
     def save(self, data):
         self.data_file.save(data)
-        Sensor.db.save(self.name,data)
-
-    def get_last_from_file(self):
-        return
+        self.db.save(self.name,data)
 
     def read(self):
         return
     
     def consol_print(self, data):
+        return
         print(self.name,":",data)
 
 class Bmp(Sensor):
@@ -61,14 +61,10 @@ class Bmp(Sensor):
             data = self.sensor.altitude-self.init_altitude
             self.consol_print(data)
             super().save(data)
+            return data
         except:
             print(self.name,"is unavailable")
     
-    def get_last_from_file(self):
-        data = self.data_file.get_last()
-        print(data)
-        return 0
-
 class Gps(Sensor):
     def __init__(self):
         self.name = "GPS"
@@ -81,7 +77,7 @@ class Gps(Sensor):
         return sensor
 
     def read(self):
-        data = [0,0]
+        data = 0
         (raw_data, parsed_data) = self.sensor.read()
         lines = str(raw_data).split('$')
         gngll_data = ""
@@ -99,13 +95,12 @@ class Gps(Sensor):
                 data = [latitude, latitude]
             except ValueError:
                 pass
-        super().save(data)
-        self.consol_print(data)
+        if data != 0:
+            super().save(data)
+            self.consol_print(data)
+            return data
+        return None
     
-    def get_last_from_file(self):
-        data = self.data_file.get_last()
-        print(data)
-        return [0,0]
     
 class Ebimu(Sensor):
     def __init__(self):
@@ -141,8 +136,5 @@ class Ebimu(Sensor):
         if data != 0:
             self.consol_print(data)
             super().save(data)
-    
-    def get_last_from_file(self):
-        data = self.data_file.get_last()
-        print(data)
-        return [0,0]
+            return data
+        return None

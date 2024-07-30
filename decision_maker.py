@@ -5,7 +5,6 @@ from sensor import Bmp
 
 class DecisionMaker:
     def __init__(self):
-        self.db = Database()
         self.init_theta()
         self.datas = []
         self.moving_averages = []
@@ -20,9 +19,6 @@ class DecisionMaker:
 
     def init_theta(self):
         self.theta = 9.514
-        input_data = input("Input THETA(Press Enter for default value): ")
-        if input_data != "":
-             self.theta = float(input_data)
 
     def is_altitude_descent(self, bmp_value):
         altitude = bmp_value
@@ -60,8 +56,6 @@ class DecisionMaker:
             return False
 
     def is_force_ejection_active(self):
-        is_force_ejection_active = self.db.get_last("force_ejection")
-        print(is_force_ejection_active)
         return False
         
     def is_in_critical_area(self,exact_position):
