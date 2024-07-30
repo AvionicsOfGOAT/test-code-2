@@ -1,13 +1,9 @@
-
-import datetime
 from database import Database
 import numpy as np
-import time
 import math
 from sensor import Bmp
 
 class DecisionMaker:
-    db = Database()
     def __init__(self):
         self.db = Database()
         self.init_theta()
@@ -24,18 +20,9 @@ class DecisionMaker:
 
     def init_theta(self):
         self.theta = 9.514
-
-    def init_altitude(self):
-        bmp = Bmp()
-        init_buffer = []
-        INIT_TIMES = 50
-        print("Wait Altitude Initialing...")
-        for i in range(INIT_TIMES):
-            init_buffer.append(bmp.read())
-            if (i + 1) % 10 == 0:
-                print(f"{(i + 1) * 2} %")
-        self.init_altitude = sum(init_buffer) / INIT_TIMES
-        print("Done OK")
+        input_data = input("Input THETA(Press Enter for default value): ")
+        if input_data != "":
+             self.theta = float(input_data)
 
     def is_altitude_descent(self, bmp_value):
         altitude = bmp_value

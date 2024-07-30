@@ -1,6 +1,5 @@
 import datetime
 import mysql.connector
-import time
 
 db_config = {
     'host': '43.202.228.198', 
@@ -25,21 +24,19 @@ class Database:
             if 'conn' in locals() and conn.is_connected():
                 self.conn.close()
                 print('MySQL diconnected.')
-
         
     def save(self, name, data):
         try:
             cursor = self.conn.cursor()
             query = "INSERT INTO rocket_data VALUES (%s, %s, %s, %s)"
-            cursor.execute(query, (0, name, time.time(), str(data)))
+            cursor.execute(query, (0, name, str(datetime.datetime.now()), str(data)))
             self.conn.commit()
-
         except mysql.connector.Error as e:
             print(f'Error inserting data into MySQL: {e}')
-
         finally:
             if 'cursor' in locals():
                 cursor.close()
+
     def get_last(self, name):
         try:
             cursor = self.conn.cursor()
@@ -53,7 +50,3 @@ class Database:
         finally:
             if 'cursor' in locals():
                 cursor.close()
-            # if 'conn' in locals() and self.conn.is_connected():
-            #     self.conn.close()
-
-

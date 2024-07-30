@@ -1,15 +1,6 @@
 import board
 import adafruit_bmp280
-import RPi.GPIO as GPIO
-import numpy as np
 import serial
-import datetime
-from multiprocessing import Process
-import sys
-import matplotlib.pyplot as plt
-import keyboard
-import os
-import random 
 from pyubx2 import UBXReader
 
 from data_file import DataFile
@@ -22,19 +13,30 @@ class Sensor:
 
     def init(self):
         self.data_file = DataFile(self.name)
-        print(self.name +" connected")
+        print(self.name +" connected.")
+
+    def reader(self, n):
+        print(self.name +" process started.")
+        while True:
+            self.read()
 
     def save(self, data):
         self.data_file.save(data)
         Sensor.db.save(self.name,data)
 
+    def get_last_from_file(self):
+        return
+
     def read(self):
-        data = 0
-        return data
+        return
+    
+    def consol_print(self, data):
+        print(self.name,":",data)
 
 class Bmp(Sensor):
     def __init__(self):
         self.name = "BMP"
+        self.INIT_TIMES = 50
         self.init_altitude = 0
         self.sensor = self.init()
 
@@ -42,15 +44,30 @@ class Bmp(Sensor):
         i2c = board.I2C()  
         sensor = adafruit_bmp280.Adafruit_BMP280_I2C(i2c)
         sensor.sea_level_pressure = 1013.25
-        self.init_altitude = sensor.altitude
+        init_buffer = []
+        self.INIT_TIMES = 50
+        print("Wait Altitude Initialing...")
+        for i in range(self.INIT_TIMES):
+            init_buffer.append(sensor.altitude)
+            if (i + 1) % 10 == 0:
+                print(f"{(i + 1) * 2} %")
+        self.init_altitude = sum(init_buffer) / self.INIT_TIMES
+        print("Done OK")
         super().init()
         return sensor
 
     def read(self):
-        data = self.sensor.altitude-self.init_altitude
-        print("bmp",data)
-        super().save(data)
-        return data
+        try:
+            data = self.sensor.altitude-self.init_altitude
+            self.consol_print(data)
+            super().save(data)
+        except:
+            print(self.name,"is unavailable")
+    
+    def get_last_from_file(self):
+        data = self.data_file.get_last()
+        print(data)
+        return 0
 
 class Gps(Sensor):
     def __init__(self):
@@ -82,9 +99,13 @@ class Gps(Sensor):
                 data = [latitude, latitude]
             except ValueError:
                 pass
-        print("gps",data)
         super().save(data)
-        return data
+        self.consol_print(data)
+    
+    def get_last_from_file(self):
+        data = self.data_file.get_last()
+        print(data)
+        return [0,0]
     
 class Ebimu(Sensor):
     def __init__(self):
@@ -98,24 +119,30 @@ class Ebimu(Sensor):
         return sensor
 
     def read(self):
-        data = [0,0,0,0,0,0]
+        data = 0
+        try:
+            if self.sensor.inWaiting():
+                read_data = str(self.sensor.read()).strip() 
+                self.buf += read_data
+                if read_data[3] == "n":
+                    self.buf = self.buf.replace("'","")
+                    self.buf = self.buf.replace("b","") 
 
-        if self.sensor.inWaiting():
-            read_data = str(self.sensor.read()).strip() 
-            self.buf += read_data
-            if read_data[3] == "n":
-                self.buf = self.buf.replace("'","")
-                self.buf = self.buf.replace("b","") 
-
-                try : 
-                    roll, pitch, yaw, x, y, z = map(float,self.buf[1:-4].split(','))
-                except Exception as e:
+                    try : 
+                        roll, pitch, yaw, x, y, z = map(float,self.buf[1:-4].split(','))
+                    except Exception as e:
+                        self.buf = ""
+                    
+                    data = [roll,pitch,yaw,x,y,z]
                     self.buf = ""
-                
-                data = [roll,pitch,yaw,x,y,z]
-                self.buf = ""
-
-        if data != [0,0,0,0,0,0]:
-            print("ebimu",data)
+        except:
+            print(self.name,"is unavailable")
+        
+        if data != 0:
+            self.consol_print(data)
             super().save(data)
-        return data
+    
+    def get_last_from_file(self):
+        data = self.data_file.get_last()
+        print(data)
+        return [0,0]
