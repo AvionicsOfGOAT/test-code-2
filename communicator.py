@@ -9,7 +9,3 @@ class Communicator:
         return
     def recieve(self):
         return
-
-
-a = {"hello":1,"a":2}
-print(str(list(a.values())))
