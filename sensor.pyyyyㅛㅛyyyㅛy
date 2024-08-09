@@ -2,7 +2,7 @@ import board
 import adafruit_bmp280
 import serial
 from pyubx2 import UBXReader
-import time
+
 from data_file import DataFile
 from database import Database
 
@@ -57,6 +57,7 @@ class Bmp(Sensor):
     def read(self):
         try:
             data = self.sensor.altitude-self.init_altitude
+            self.consol_print(data)
             super().save(data)
             return data
         except:
@@ -76,7 +77,6 @@ class Gps(Sensor):
     def read(self):
         data = 0
         (raw_data, parsed_data) = self.sensor.read()
-        #print(raw_data)
         lines = str(raw_data).split('$')
         gngll_data = ""
         for line in lines:
